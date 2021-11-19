@@ -21,42 +21,59 @@ async function run() {
         console.log('Connect to Database');
         const database = client.db("servicesDetails");
         const servicesCollection = database.collection("services");
+        const servicesOrder = database.collection('Order')
 
-        //Get Api    
+
+        // Post api services add success
+        app.post('/servicesadd', async (req, res) => {
+            const service = req.body;
+            const result = await servicesCollection.insertOne(service);
+            console.log(result);
+            res.json(result);
+        })
+
+        //Get Api  data load  ui
         app.get('/services', async (req, res) => {
             const cursor = servicesCollection.find({});
             const services = await cursor.toArray();
             res.send(services);
         })
 
-        // Get single service
-        app.get('/services/:id', async (req, res) => {
-            const id = req.params.id;
-            console.log('getting specific service', id)
-            const query = { _id: ObjectId(id) };
-            const service = await servicesCollection.findOne(query);
-            res.json(service)
+        //order to server add
+        app.post('/order', async (req, res) => {
+            console.log('database hot Order')
+            const order = req.body;
+            const result = await servicesOrder.insertOne(order);
+            res.json(result)
+        });
+
+        //All Order Manages
+        app.get('/allorder', async (req, res) => {
+            const cursor = servicesOrder.find();
+            const allOrder = await cursor.toArray();
+            res.json(allOrder);
         })
 
-        // Post api
-        app.post('/services', async (req, res) => {
-
-            const service = req.body;
-
-            console.log('hit the post api', service)
-            const result = await servicesCollection.insertOne(service);
-            console.log(result);
-
-            res.json(result);
+        //My Order manage ui show
+        app.get('/order',  async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const cursor = servicesOrder.find(query);
+            const order = await cursor.toArray();
+            res.json(order);
         })
+
+
+
+       
 
         // Delete api
-        app.delete('/services/:id', async (req, res) => {
+        app.delete('/order/:id', async (req, res) => {
             console.log('hitting delete')
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
 
-            const result = await servicesCollection.deleteOne(query);
+            const result = await servicesOrder.deleteOne(query);
             res.json(result)
         })
 
@@ -71,9 +88,9 @@ async function run() {
 run().catch(console.dir);
 
 app.get('/', (req, res) => {
-    res.send('Running Genius Server');
+    res.send('Running Amra Fast');
 })
 
 app.listen(port, () => {
-    console.log('Running Genius Server on Port', port)
+    console.log('Running Amra Fast Server on Port !', port)
 })
